@@ -20,7 +20,7 @@ This is	Simple CRUD App including React Navigation, Nativebase and Axios. You ca
 ## Installation
 open terminal and change directory to your desired folder, then:
 ```
-$ git clone https://github.com/DumbwaysDotId/RnDwBoilerplate YourAppName
+$ git clone https://github.com/DeVoresyah/RN-Crud YourAppName
 $ cd YourAppName
 $ npm install
 ```
