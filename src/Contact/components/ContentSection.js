@@ -1,30 +1,60 @@
 import React, { Component } from 'react';
-import { Alert, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, View, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { Content, List, ListItem, Button, Icon, Body, Text } from 'native-base';
 import axios from 'axios';
 import { StackActions, NavigationActions } from 'react-navigation';
 
-class Showlist extends Component {
+export default class ContentSection extends Component {
+	constructor(props) {
+	  super(props);
+	
+	  this.state = {
+	  	contactList: [],
+	  	page: 2,
+	  	loading: false,
+	  	refreshing: false
+	  };
+	}
+
+	componentDidMount() {
+		this.getData();
+	};
+
+	getData = () => {
+		const vm = this;
+
+		this.setState({
+			loading:true
+		});
+
+		axios.get('http://192.168.0.27:3000/contact')
+		.then(function(result) {
+			vm.setState({
+				page: 2,
+				loading: false,
+				refreshing: false,
+				contactList: result.data
+			});
+		})
+		.catch(function(err) {
+			alert(err)
+		});
+	};
 
 	deleteContact = (id) => {
-		const vm = this;
+		var vm = this;
 
 		axios.delete('http://192.168.0.27:3000/contact/delete/'+id)
 		.then(function(response) {
 			const data = response.data;
 
 			alert(data.msg);
-			vm.props.navigation.dispatch(
-				StackActions.reset({
-					index: 0,
-					actions: [NavigationActions.navigate({routeName: 'Contact'})]
-				})
-			)
+			vm.getData();
 		})
 		.catch(function(err) {
 			alert(err)
 		})
-	}
+	};
 
 	showAlert = (id, name) => {
 		const vm = this;
@@ -37,69 +67,93 @@ class Showlist extends Component {
 				{text: 'Delete', onPress: () => this.deleteContact(id)},
 			]
 		)
+	};
+
+	renderFooter = () => {
+		if (!this.state.loading) return null;
+
+		return (
+			<View
+			style={{
+				flex:1,
+				paddingVertical: 20,
+				justifyContent: 'center',
+				position: 'absolute'
+			}}>
+				<ActivityIndicator animating size="large" />
+			</View>
+		)
+	};
+
+	dataRefresh = () => {
+		this.setState({
+			refreshing: true
+		},
+		() => {
+			this.getData();
+		}
+		)
 	}
 
-	render() {
-		let contactList = this.props.list;
+	loadMore = () => {
+		const vm = this;
 
-		if (contactList.length === 0) {
-			return (
-				<View style={{justifyContent:'center', alignItems:'center', paddingTop:250}}>
-					<Text style={styles.emptyText}>No Data Available</Text>
-				</View>
+		this.setState({
+			loading: true
+		}, () => {
+			axios.get('http://192.168.0.27:3000/contact/page/'+this.state.page)
+			.then(function(response) {
+				const newList = vm.state.contactList.concat(response.data);
+				const newPage = vm.state.page + 1;
+				vm.setState({
+					contactList: newList,
+					page: newPage,
+					loading: false
+				})
+			})
+			.catch(function(err) {
+				alert(err)
+			})
+		});
+	};
+
+	render() {
+		if (this.state.contactList.length == 0) {
+			return(
+				<Content style={styles.contentWrapper}>
+					<View style={{justifyContent:'center', alignItems:'center', paddingTop:250}}>
+						<Text style={styles.emptyText}>No Data Available</Text>
+					</View>
+				</Content>
 			)
 		} else {
 			return (
-				<List
-				dataArray={contactList}
-				renderRow={(item) => 
-					<ListItem style={styles.listItem}>
-						<TouchableOpacity
-						onPress={() => this.props.navigation.navigate('EditContact', item)}
-						onLongPress={() => this.showAlert(item.id, item.name)}
-						activeOpacity={0.5}>
-							<Body>
-								<Text>{item.name}</Text>
-								<Text note numberOfLines={1}>{item.phone}</Text>
-							</Body>
-						</TouchableOpacity>
-					</ListItem>
-				}>
-				</List>
+					<List style={{flex:1}}>
+						<FlatList
+							data={this.state.contactList}
+							keyExtractor={(item) => item.id.toString()}
+							renderItem={({item}) => (
+								<ListItem style={styles.listItem}>
+									<TouchableOpacity
+									onPress={() => this.props.navigation.navigate('EditContact', item)}
+									onLongPress={() => this.showAlert(item.id, item.name)}
+									activeOpacity={0.5}>
+										<Body>
+											<Text>{item.name}</Text>
+											<Text note numberOfLines={1}>{item.phone}</Text>
+										</Body>
+									</TouchableOpacity>
+								</ListItem>
+							)}
+							ListFooterComponent={this.renderFooter}
+							onRefresh={this.dataRefresh}
+							refreshing={this.state.refreshing}
+							onEndReached={this.loadMore}
+							onEndReachedThreshold={0.1}
+						/>
+					</List>
 			)
 		}
-	}
-}
-
-export default class ContentSection extends Component {
-	constructor() {
-	  super();
-	
-	  this.state = {
-	  	contactList: []
-	  };
-	}
-
-	componentDidMount() {
-		const vm = this;
-
-		axios.get('http://192.168.0.27:3000/contact')
-		.then(function(result) {
-			vm.setState({
-				contactList: result.data
-			})
-		})
-		.catch(function(err) {
-			alert(err)
-		});
-	}
-
-	render() {
-		return (
-			<Content style={styles.contentWrapper}>
-				<Showlist list={this.state.contactList} navigation={this.props.navigation} />
-			</Content>
-		)
 	}
 }
 

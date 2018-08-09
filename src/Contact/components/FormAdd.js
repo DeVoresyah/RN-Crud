@@ -51,10 +51,7 @@ export default class FormAdd extends Component {
 
 				alert(data.msg);
 				vm.props.navigation.dispatch(
-					StackActions.reset({
-						index: 0,
-						actions: [NavigationActions.navigate({routeName: 'Contact'})]
-					})
+					vm.props.navigation.goBack()
 				)
 			})
 			.catch(function(err) {
