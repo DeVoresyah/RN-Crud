@@ -4,13 +4,23 @@ var router = express.Router();
 
 
 router.get('/', function(req, res, next) {
-  conDB.query('SELECT * FROM contact', function(err, rows, fields) {
+  conDB.query('SELECT * FROM contact LIMIT 10', function(err, rows, fields) {
   	if (err) {
   		throw err
   	}
 
   	res.send(rows);
   });
+});
+
+router.get('/page/:id', function(req, res, next) {
+	var page = (req.params.id * 10) - 10;
+	conDB.query('SELECT * FROM contact LIMIT 10 OFFSET '+page, function(err, rows, fields) {
+		if (err) {
+			throw err
+		}
+		res.send(rows);
+	});
 });
 
 router.post('/add', function(req, res, next) {
