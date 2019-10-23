@@ -1,7 +1,7 @@
-![License][license-image]
-
 # Simple CRUD App Using React-Native
 This is	Simple CRUD App including React Navigation, Nativebase and Axios. You can create, update, and delete data with this app. For the backend I'm using expressjs and mysql as database.
+
+[![MIT License][license-image]][license-url] [![Stars][stars-image]][stars-url] [![js-standard-style][js-standard]][js-standard-url] [![React Native][package-react-native]][react-native-url]
 
 ## Prerequisites
 - JDK 1.8
