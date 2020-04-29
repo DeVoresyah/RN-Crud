@@ -1,3 +1,5 @@
+## This project is not recommend for learning anymore. Because I made this before React Native 0.60.x, for new best practice please check [github.com/libscode/CovidLibs](https://github.com/libscode/CovidLibs)
+
 # Simple CRUD App Using React-Native
 This is	Simple CRUD App including React Navigation, Nativebase and Axios. You can create, update, and delete data with this app. For the backend I'm using expressjs and mysql as database.
 
